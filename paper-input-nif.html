@@ -1,0 +1,95 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../iron-validator-behavior/iron-validator-behavior.html">
+
+<dom-module id="paper-input-nif">
+  <template>
+    <style>
+      iron-input > input {
+        text-transform:uppercase;
+      }
+    </style>
+    <nif-validator></nif-validator>
+  </template>
+  <script>
+    (function() {
+      class NifValidator extends Polymer.mixinBehaviors([Polymer.IronValidatorBehavior], Polymer.Element) {
+        static get is() { return "nif-validator" }
+
+        validate(dni) {
+          var numero, cd, letra;
+          var expresion_regular_dni = /^[XYZ]?\d{5,8}[A-Z]$/;
+
+          dni = dni.toUpperCase();
+
+          if(expresion_regular_dni.test(dni) === true){
+            numero = dni.substr(0,dni.length-1);
+            numero = numero.replace('X', 0);
+            numero = numero.replace('Y', 1);
+            numero = numero.replace('Z', 2);
+            cd = dni.substr(dni.length-1, 1);
+            numero = numero % 23;
+            letra = 'TRWAGMYFPDXBNJZSQVHLCKET';
+            letra = letra.substring(numero, numero+1);
+            if (letra != cd) {
+              return false;
+            }else{
+              return true;
+            }
+          }else{
+            return false;
+          }
+        }
+      }
+
+      var memoizedTemplate;
+
+      /**
+       * `paper-input-nif`
+       * Spanish ID (NIF, NIE, CIF) paper input
+       *
+       * @customElement
+       * @polymer
+       * @demo demo/index.html
+       */
+      class PaperInputNif extends window.customElements.get('paper-input') {
+        static get is() { return 'paper-input-nif'; }
+        static get properties() {
+          return {
+            validator: {
+              type: String,
+              value: "nif-validator"
+            },
+            allowedPattern: {
+              type: String,
+              value: "[0-9A-Za-z]"
+            },
+            preventInvalidInput: {
+              type: Boolean,
+              value: true
+            },
+            autoValidate: {
+              type: Boolean,
+              value: true
+            },
+            errorMessage: {
+              type: String,
+              value: "El NIF o NIE es inválido"
+            }
+          };
+        }
+        static get template() {
+          if(!memoizedTemplate) {
+            var validator = Polymer.DomModule.import('paper-input-nif', 'template');
+            var memoizedTemplate = Polymer.DomModule.import('paper-input', 'template').cloneNode(true)
+            memoizedTemplate.content.appendChild(validator.content);
+          }
+          return memoizedTemplate;
+        }
+      }
+
+      window.customElements.define(NifValidator.is, NifValidator);
+      window.customElements.define(PaperInputNif.is, PaperInputNif);
+    })();
+  </script>
+</dom-module>
