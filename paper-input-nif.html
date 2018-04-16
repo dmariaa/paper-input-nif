@@ -17,6 +17,8 @@
         static get is() { return "nif-validator" }
 
         validate(dni) {
+          if(!dni) return true;
+
           var numero, cd, letra;
           var expresion_regular_dni = /^[XYZ]?\d{5,8}[A-Z]$/;
 
