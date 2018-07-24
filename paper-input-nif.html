@@ -16,31 +16,66 @@
       class NifValidator extends Polymer.mixinBehaviors([Polymer.IronValidatorBehavior], Polymer.Element) {
         static get is() { return "nif-validator" }
 
-        validate(dni) {
-          if(!dni) return true;
+        validate(id) {
+          if(!id) return true;
 
+          var expresion_regular_dni = /^[XYZ]?\d{5,8}[A-HJ-NP-TV-Z]$/;
+          var expresion_regular_cif = /^[ABCDEFGHJKLMNPQRSUVW]?\d{7}[0-9A-J]$/;
+
+          if(expresion_regular_dni.test(id) === true) {
+            return this.validateNIF(id);
+          } else if(expresion_regular_cif.test(id) === true) {
+            return this.validateCIF(id);
+          }
+
+          return false;
+        }
+
+        validateNIF(dni) {
           var numero, cd, letra;
-          var expresion_regular_dni = /^[XYZ]?\d{5,8}[A-Z]$/;
 
           dni = dni.toUpperCase();
+          numero = dni.substr(0,dni.length-1);
+          numero = numero.replace('X', 0);
+          numero = numero.replace('Y', 1);
+          numero = numero.replace('Z', 2);
+          cd = dni.substr(dni.length-1, 1);
+          numero = numero % 23;
+          letra = 'TRWAGMYFPDXBNJZSQVHLCKET';
+          letra = letra.substring(numero, numero+1);
+          return (letra==cd);
+        }
 
-          if(expresion_regular_dni.test(dni) === true){
-            numero = dni.substr(0,dni.length-1);
-            numero = numero.replace('X', 0);
-            numero = numero.replace('Y', 1);
-            numero = numero.replace('Z', 2);
-            cd = dni.substr(dni.length-1, 1);
-            numero = numero % 23;
-            letra = 'TRWAGMYFPDXBNJZSQVHLCKET';
-            letra = letra.substring(numero, numero+1);
-            if (letra != cd) {
-              return false;
-            }else{
-              return true;
-            }
-          }else{
-            return false;
+        validateCIF(cif) {
+          var letras_control = 'ABCDEFGHIJ';
+          var numero = cif.substr(1,cif.length-2);
+          var letra = cif.substr(0,1);
+          var cd = cif.substr(cif.length-1, 1);
+
+          var suma_pares = 0;
+          for(var i=1,length=numero.length; i < length; i += 2) {
+            suma_pares += parseInt(numero.substr(i,1));
           }
+          var suma_impares = 0;
+          for(var i=0, length=numero.length; i < length; i += 2) {
+            var parcial = parseInt(numero.substr(i,1)) * 2;
+            if(String(parcial).length==1) {
+              suma_impares += parcial;
+            } else {
+              suma_impares += parseInt(String(parcial).substr(0,1)) + parseInt(String(parcial).substr(1,1));
+            }
+          }
+          var suma_total = String(suma_pares + suma_impares);
+          var ccd = suma_total.substr(suma_total.length-1,1);
+          ccd = (ccd==0) ? ccd : 10 - ccd;
+
+          if("ABCDEGHJUV".indexOf(letra) >= 0) {
+            return (ccd==parseInt(cd));
+          } else {
+            return (letras_control.substr(ccd-1,1)==cd);
+          }
+
+          return false;
         }
       }
 
