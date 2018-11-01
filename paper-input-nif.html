@@ -19,6 +19,7 @@
         validate(id) {
           if(!id) return true;
 
+          id = id.toUpperCase();
           var expresion_regular_dni = /^[XYZ]?\d{5,8}[A-HJ-NP-TV-Z]$/;
           var expresion_regular_cif = /^[ABCDEFGHJKLMNPQRSUVW]?\d{7}[0-9A-J]$/;
 
